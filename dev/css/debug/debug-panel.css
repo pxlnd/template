@@ -1,0 +1,83 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: "Open Sans", Arial, sans-serif;
+  background: #f2f4f8;
+  color: #1a2b47;
+}
+
+.app-shell {
+  padding: 24px;
+}
+
+.app-shell h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.app-shell p {
+  margin: 0;
+}
+
+.app-shell kbd {
+  border: 1px solid #c3cad8;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: #fff;
+  padding: 2px 8px;
+}
+
+.debug-panel {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: min(240px, calc(100vw - 32px));
+  padding: 14px;
+  border: 1px solid #c7cfdd;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(21, 34, 58, 0.18);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100000;
+}
+
+.debug-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.debug-panel__title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.debug-panel__actions {
+  display: grid;
+  gap: 8px;
+}
+
+.debug-panel__button {
+  width: 100%;
+  border: 1px solid #a6b4cb;
+  border-radius: 8px;
+  background: #eef3fb;
+  color: #1d2c49;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.debug-panel__button:hover {
+  background: #e3ebf9;
+}
