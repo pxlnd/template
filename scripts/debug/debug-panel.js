@@ -4,9 +4,16 @@
   function DebugPanel(options) {
     var opts = options || {};
     this.mountNode = opts.mount && opts.mount.nodeType === 1 ? opts.mount : document.body;
+    this.handlers = {
+      onWin: opts.onWin,
+      onLose: opts.onLose,
+      onRestart: opts.onRestart
+    };
     this.visible = false;
     this.root = this._createMarkup();
     this.mountNode.appendChild(this.root);
+    this.refs = this._collectRefs();
+    this._bindEvents();
   }
 
   DebugPanel.prototype._createMarkup = function() {
@@ -25,6 +32,43 @@
     ].join('');
 
     return container;
+  };
+
+  DebugPanel.prototype._collectRefs = function() {
+    var buttons = this.root.querySelectorAll('.debug-panel__button');
+    return {
+      winButton: buttons[0] || null,
+      loseButton: buttons[1] || null,
+      restartButton: buttons[2] || null
+    };
+  };
+
+  DebugPanel.prototype._emit = function(name) {
+    var cb = this.handlers[name];
+    if (typeof cb !== 'function') return;
+    cb();
+  };
+
+  DebugPanel.prototype._bindEvents = function() {
+    var scope = this;
+
+    if (this.refs.winButton) {
+      this.refs.winButton.addEventListener('click', function() {
+        scope._emit('onWin');
+      });
+    }
+
+    if (this.refs.loseButton) {
+      this.refs.loseButton.addEventListener('click', function() {
+        scope._emit('onLose');
+      });
+    }
+
+    if (this.refs.restartButton) {
+      this.refs.restartButton.addEventListener('click', function() {
+        scope._emit('onRestart');
+      });
+    }
   };
 
   DebugPanel.prototype.show = function() {
