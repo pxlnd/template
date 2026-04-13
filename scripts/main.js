@@ -53,20 +53,42 @@
       return state.maxLives;
     }
 
+    function rewardResult(value) {
+      var isSuccess = toBoolean(value);
+      loseScreen.rewardResult(isSuccess);
+      return isSuccess;
+    }
+
     return {
       state: state,
       setCoins: setCoins,
       setHearts: setHearts,
       setTimeOutCoinsCost: setTimeOutCoinsCost,
       setSubscriptionStatus: setSubscriptionStatus,
-      setMaxLives: setMaxLives
+      setMaxLives: setMaxLives,
+      rewardResult: rewardResult
     };
   }
 
   function boot() {
+    function continueAfterRewardMock() {
+      // TODO: Replace with real game continuation flow.
+      console.log('[mock] Continue game after rewarded ad');
+    }
+
     var loseScreen = new global.LoseScreen({
       stylesheetPath: './css/lose-screen.css',
-      assetBasePath: './content/icons/lose'
+      assetBasePath: './content/icons/lose',
+      onRewardRequest: function() {
+        global.location.href = 'uniwebview://reward';
+      },
+      onRewardResult: function(payload) {
+        if (!payload || payload.success !== true) return;
+        continueAfterRewardMock();
+      },
+      onPurchase: function() {
+        global.location.href = 'uniwebview://subscription_request';
+      }
     });
     var unityBridge = createUnityBridge(loseScreen);
     var debugPanel = new global.DebugPanel({
@@ -87,6 +109,7 @@
     global.setTimeOutCoinsCost = unityBridge.setTimeOutCoinsCost;
     global.setSubscriptionStatus = unityBridge.setSubscriptionStatus;
     global.setMaxLives = unityBridge.setMaxLives;
+    global.rewardResult = unityBridge.rewardResult;
 
     global.unityState = unityBridge.state;
     global.unityBridge = unityBridge;
