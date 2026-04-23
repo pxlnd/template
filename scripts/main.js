@@ -14,16 +14,19 @@
     return normalized === 'true' || normalized === '1' || normalized === 'yes';
   }
 
-  function createUnityBridge(loseScreen, mainHud) {
+  function createUnityBridge(loseScreen, mainHud, quitScreen) {
+    var loseScreenState = loseScreen.getState();
     var mainHudState = mainHud ? mainHud.getState() : { level: 1, visible: false };
+    var quitScreenState = quitScreen ? quitScreen.getState() : { visible: false };
     var state = {
-      coinsCount: loseScreen.getState().coinsCount,
-      heartsCount: loseScreen.getState().heartsCount,
-      timeOutCoinsCost: loseScreen.getState().timeOutCoinsCost,
-      isSubscribed: loseScreen.getState().isSubscribed,
-      maxLives: loseScreen.getState().heartsMaxCount,
+      coinsCount: loseScreenState.coinsCount,
+      heartsCount: loseScreenState.heartsCount,
+      timeOutCoinsCost: loseScreenState.timeOutCoinsCost,
+      isSubscribed: loseScreenState.isSubscribed,
+      maxLives: loseScreenState.heartsMaxCount,
       level: mainHudState.level,
-      mainHudVisible: mainHudState.visible
+      mainHudVisible: mainHudState.visible,
+      quitScreenVisible: quitScreenState.visible
     };
 
     if (mainHud) {
@@ -35,15 +38,33 @@
       });
     }
 
+    if (quitScreen) {
+      quitScreen.setHandlers({
+        onShow: function(nextState) {
+          state.quitScreenVisible = nextState.visible;
+        },
+        onHide: function(nextState) {
+          state.quitScreenVisible = nextState.visible;
+        },
+        onStateChange: function(nextState) {
+          state.coinsCount = nextState.coinsCount;
+          state.heartsCount = nextState.heartsCount;
+          state.quitScreenVisible = nextState.visible;
+        }
+      });
+    }
+
     function setCoins(value) {
       state.coinsCount = Math.max(0, toNumber(value, 0));
       loseScreen.setCoins(state.coinsCount);
+      if (quitScreen) quitScreen.setCoins(state.coinsCount);
       return state.coinsCount;
     }
 
     function setHearts(value) {
       state.heartsCount = Math.max(0, toNumber(value, 0));
       loseScreen.setHearts(state.heartsCount);
+      if (quitScreen) quitScreen.setHearts(state.heartsCount);
       return state.heartsCount;
     }
 
@@ -102,6 +123,26 @@
       return state.mainHudVisible;
     }
 
+    function showQuitScreen() {
+      if (!quitScreen) {
+        state.quitScreenVisible = true;
+        return state.quitScreenVisible;
+      }
+      quitScreen.show();
+      state.quitScreenVisible = quitScreen.getState().visible;
+      return state.quitScreenVisible;
+    }
+
+    function hideQuitScreen() {
+      if (!quitScreen) {
+        state.quitScreenVisible = false;
+        return state.quitScreenVisible;
+      }
+      quitScreen.hide();
+      state.quitScreenVisible = quitScreen.getState().visible;
+      return state.quitScreenVisible;
+    }
+
     return {
       state: state,
       setCoins: setCoins,
@@ -112,7 +153,9 @@
       rewardResult: rewardResult,
       setLevel: setLevel,
       showMainHud: showMainHud,
-      hideMainHud: hideMainHud
+      hideMainHud: hideMainHud,
+      showQuitScreen: showQuitScreen,
+      hideQuitScreen: hideQuitScreen
     };
   }
 
@@ -136,26 +179,42 @@
         global.location.href = 'uniwebview://subscription_request';
       }
     });
+    var quitScreen = typeof global.QuitScreen === 'function'
+      ? new global.QuitScreen({
+        stylesheetPath: './css/quit-screen.css',
+        assetBasePath: './content/icons/quit',
+        coins: loseScreen.getState().coinsCount,
+        hearts: loseScreen.getState().heartsCount,
+        onQuit: function(state) {
+          global.location.href = 'uniwebview://close?coins=' + state.coinsCount + '&hearts=' + state.heartsCount;
+        }
+      })
+      : null;
     var mainHud = typeof global.MainHud === 'function'
       ? new global.MainHud({
         stylesheetPath: './css/main-hud.css',
         assetBasePath: './content/icons/game',
         level: 1,
         onBack: function() {
-          global.location.href = 'uniwebview://back';
+          if (!quitScreen) {
+            global.location.href = 'uniwebview://back';
+            return;
+          }
+          quitScreen.show();
         },
         onRestart: function() {
           global.location.href = 'uniwebview://restart';
         }
       })
       : null;
-    var unityBridge = createUnityBridge(loseScreen, mainHud);
+    var unityBridge = createUnityBridge(loseScreen, mainHud, quitScreen);
     var debugPanel = new global.DebugPanel({
       onLose: function() {
         loseScreen.show();
       },
       onRestart: function() {
         loseScreen.hide();
+        if (quitScreen) quitScreen.hide();
       }
     });
     var hotkeyController = new global.DebugHotkeyController({
@@ -172,10 +231,13 @@
     global.setLevel = unityBridge.setLevel;
     global.showMainHud = unityBridge.showMainHud;
     global.hideMainHud = unityBridge.hideMainHud;
+    global.showQuitScreen = unityBridge.showQuitScreen;
+    global.hideQuitScreen = unityBridge.hideQuitScreen;
 
     global.unityState = unityBridge.state;
     global.unityBridge = unityBridge;
     global.loseScreen = loseScreen;
+    global.quitScreen = quitScreen;
     global.mainHud = mainHud;
     global.debugPanel = debugPanel;
     global.debugHotkeyController = hotkeyController;
