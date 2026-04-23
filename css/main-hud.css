@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@800&display=swap');
+
+.mh-hud-top {
+  position: fixed;
+  top: calc(max(14px, env(safe-area-inset-top)) + 20px);
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  transform: scale(0.7225);
+  transform-origin: top center;
+}
+
+.mh-badge-caption,
+.mh-badge-value {
+  font-family: 'Open Sans', 'Arial Black', Impact, sans-serif;
+  font-size: clamp(28px, 5.8vw, 40px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #2e558f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.mh-hud-main {
+  width: min(500px, calc(100vw - 80px));
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(clamp(18px, 3vw, 30px) + 10px);
+}
+
+.mh-level-panel {
+  width: clamp(170px, 30vw, 210px);
+  min-height: clamp(58px, 10vw, 74px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 clamp(10px, 2.2vw, 16px);
+  border-radius: clamp(18px, 3vw, 24px);
+  background: linear-gradient(180deg, #f6f7fb 0%, #eceff6 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 0 #8aacf1,
+    0 14px 18px rgba(67, 100, 171, 0.18);
+}
+
+.mh-icon-btn {
+  width: clamp(58px, 10vw, 70px);
+  height: clamp(58px, 10vw, 70px);
+  border: 0;
+  border-radius: 20px;
+  box-shadow: none;
+  background-color: transparent;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  color: transparent;
+  text-indent: -9999px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mh-back-btn {
+  background-image: var(--mh-back-icon, url('./assets/back_button.png'));
+}
+
+.mh-icon-btn-restart {
+  background-image: var(--mh-restart-icon, url('./assets/restart_button.png'));
+}
+
+.mh-icon-btn:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 680px) {
+  .mh-hud-top {
+    top: calc(max(12px, env(safe-area-inset-top)) + 14px);
+  }
+
+  .mh-badge-caption,
+  .mh-badge-value {
+    font-size: clamp(22px, 6.4vw, 32px);
+  }
+
+  .mh-hud-main {
+    width: calc(100vw - 40px);
+    gap: 24px;
+  }
+
+  .mh-level-panel {
+    width: clamp(150px, 42vw, 188px);
+    min-height: clamp(52px, 13vw, 66px);
+    gap: 8px;
+  }
+
+  .mh-icon-btn {
+    width: clamp(52px, 13.5vw, 62px);
+    height: clamp(52px, 13.5vw, 62px);
+    border-radius: 16px;
+  }
+}

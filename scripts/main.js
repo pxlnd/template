@@ -14,14 +14,26 @@
     return normalized === 'true' || normalized === '1' || normalized === 'yes';
   }
 
-  function createUnityBridge(loseScreen) {
+  function createUnityBridge(loseScreen, mainHud) {
+    var mainHudState = mainHud ? mainHud.getState() : { level: 1, visible: false };
     var state = {
       coinsCount: loseScreen.getState().coinsCount,
       heartsCount: loseScreen.getState().heartsCount,
       timeOutCoinsCost: loseScreen.getState().timeOutCoinsCost,
       isSubscribed: loseScreen.getState().isSubscribed,
-      maxLives: loseScreen.getState().heartsMaxCount
+      maxLives: loseScreen.getState().heartsMaxCount,
+      level: mainHudState.level,
+      mainHudVisible: mainHudState.visible
     };
+
+    if (mainHud) {
+      mainHud.setHandlers({
+        onStateChange: function(nextState) {
+          state.level = nextState.level;
+          state.mainHudVisible = nextState.visible;
+        }
+      });
+    }
 
     function setCoins(value) {
       state.coinsCount = Math.max(0, toNumber(value, 0));
@@ -59,6 +71,37 @@
       return isSuccess;
     }
 
+    function setLevel(value) {
+      var nextLevel = Math.max(1, toNumber(value, 1));
+      if (!mainHud) {
+        state.level = nextLevel;
+        return state.level;
+      }
+      mainHud.setLevel(nextLevel);
+      state.level = mainHud.getState().level;
+      return state.level;
+    }
+
+    function showMainHud() {
+      if (!mainHud) {
+        state.mainHudVisible = true;
+        return state.mainHudVisible;
+      }
+      mainHud.show();
+      state.mainHudVisible = mainHud.getState().visible;
+      return state.mainHudVisible;
+    }
+
+    function hideMainHud() {
+      if (!mainHud) {
+        state.mainHudVisible = false;
+        return state.mainHudVisible;
+      }
+      mainHud.hide();
+      state.mainHudVisible = mainHud.getState().visible;
+      return state.mainHudVisible;
+    }
+
     return {
       state: state,
       setCoins: setCoins,
@@ -66,7 +109,10 @@
       setTimeOutCoinsCost: setTimeOutCoinsCost,
       setSubscriptionStatus: setSubscriptionStatus,
       setMaxLives: setMaxLives,
-      rewardResult: rewardResult
+      rewardResult: rewardResult,
+      setLevel: setLevel,
+      showMainHud: showMainHud,
+      hideMainHud: hideMainHud
     };
   }
 
@@ -90,7 +136,20 @@
         global.location.href = 'uniwebview://subscription_request';
       }
     });
-    var unityBridge = createUnityBridge(loseScreen);
+    var mainHud = typeof global.MainHud === 'function'
+      ? new global.MainHud({
+        stylesheetPath: './css/main-hud.css',
+        assetBasePath: './content/icons/game',
+        level: 1,
+        onBack: function() {
+          global.location.href = 'uniwebview://back';
+        },
+        onRestart: function() {
+          global.location.href = 'uniwebview://restart';
+        }
+      })
+      : null;
+    var unityBridge = createUnityBridge(loseScreen, mainHud);
     var debugPanel = new global.DebugPanel({
       onLose: function() {
         loseScreen.show();
@@ -110,10 +169,14 @@
     global.setSubscriptionStatus = unityBridge.setSubscriptionStatus;
     global.setMaxLives = unityBridge.setMaxLives;
     global.rewardResult = unityBridge.rewardResult;
+    global.setLevel = unityBridge.setLevel;
+    global.showMainHud = unityBridge.showMainHud;
+    global.hideMainHud = unityBridge.hideMainHud;
 
     global.unityState = unityBridge.state;
     global.unityBridge = unityBridge;
     global.loseScreen = loseScreen;
+    global.mainHud = mainHud;
     global.debugPanel = debugPanel;
     global.debugHotkeyController = hotkeyController;
   }
