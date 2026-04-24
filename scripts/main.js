@@ -24,6 +24,7 @@
       timeOutCoinsCost: loseScreenState.timeOutCoinsCost,
       isSubscribed: loseScreenState.isSubscribed,
       maxLives: loseScreenState.heartsMaxCount,
+      livesTimerText: loseScreenState.livesTimerText,
       level: mainHudState.level,
       mainHudVisible: mainHudState.visible,
       quitScreenVisible: quitScreenState.visible
@@ -65,6 +66,7 @@
         state.timeOutCoinsCost = nextState.timeOutCoinsCost;
         state.isSubscribed = nextState.isSubscribed;
         state.maxLives = nextState.heartsMaxCount;
+        state.livesTimerText = nextState.livesTimerText;
 
         if (quitScreen) {
           quitScreen.setCoins(state.coinsCount);
@@ -103,6 +105,12 @@
       state.maxLives = Math.max(0, toNumber(value, 0));
       loseScreen.setMaxLives(state.maxLives);
       return state.maxLives;
+    }
+
+    function setLivesTimer(value) {
+      state.livesTimerText = String(value || '--:--');
+      loseScreen.setLivesTimer(state.livesTimerText);
+      return state.livesTimerText;
     }
 
     function rewardResult(value) {
@@ -185,6 +193,7 @@
       setTimeOutCoinsCost: setTimeOutCoinsCost,
       setSubscriptionStatus: setSubscriptionStatus,
       setMaxLives: setMaxLives,
+      setLivesTimer: setLivesTimer,
       rewardResult: rewardResult,
       showLoseScreen: showLoseScreen,
       hideLoseScreen: hideLoseScreen,
@@ -277,6 +286,7 @@
     global.setTimeOutCoinsCost = unityBridge.setTimeOutCoinsCost;
     global.setSubscriptionStatus = unityBridge.setSubscriptionStatus;
     global.setMaxLives = unityBridge.setMaxLives;
+    global.setLivesTimer = unityBridge.setLivesTimer;
     global.rewardResult = unityBridge.rewardResult;
     global.showLoseScreen = unityBridge.showLoseScreen;
     global.hideLoseScreen = unityBridge.hideLoseScreen;
