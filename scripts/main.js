@@ -218,6 +218,19 @@
       global.location.href = 'uniwebview://close?coins=' + coins + '&hearts=' + hearts;
     }
 
+    function trackUnityEvent(event, action) {
+      var eventName = encodeURIComponent(String(event));
+      var eventAction = encodeURIComponent(String(action));
+      global.location.href = 'uniwebview://track?event=' + eventName + '&event_action=' + eventAction;
+    }
+
+    function navigateRestart() {
+      trackUnityEvent('level', 'restart');
+      global.setTimeout(function() {
+        global.location.href = 'uniwebview://restart';
+      }, 50);
+    }
+
     var loseScreen = new global.LoseScreen({
       stylesheetPath: './css/lose-screen.css',
       assetBasePath: './content/icons/lose',
@@ -233,6 +246,9 @@
       },
       onClose: function(state) {
         navigateClose(state);
+      },
+      onRestart: function() {
+        navigateRestart();
       }
     });
     var quitScreen = typeof global.QuitScreen === 'function'
@@ -259,7 +275,7 @@
           quitScreen.show();
         },
         onRestart: function() {
-          global.location.href = 'uniwebview://restart';
+          navigateRestart();
         }
       })
       : null;
