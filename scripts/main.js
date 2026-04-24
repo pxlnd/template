@@ -172,6 +172,12 @@
       return state.quitScreenVisible;
     }
 
+    function complete() {
+      var coins = encodeURIComponent(String(state.coinsCount));
+      var hearts = encodeURIComponent(String(state.heartsCount));
+      global.location.href = 'uniwebview://complete?coins=' + coins + '&hearts=' + hearts;
+    }
+
     return {
       state: state,
       setCoins: setCoins,
@@ -186,7 +192,8 @@
       showMainHud: showMainHud,
       hideMainHud: hideMainHud,
       showQuitScreen: showQuitScreen,
-      hideQuitScreen: hideQuitScreen
+      hideQuitScreen: hideQuitScreen,
+      complete: complete
     };
   }
 
@@ -194,6 +201,12 @@
     function continueAfterRewardMock() {
       // TODO: Replace with real game continuation flow.
       console.log('[mock] Continue game after rewarded ad');
+    }
+
+    function navigateClose(state) {
+      var coins = encodeURIComponent(String(state.coinsCount));
+      var hearts = encodeURIComponent(String(state.heartsCount));
+      global.location.href = 'uniwebview://close?coins=' + coins + '&hearts=' + hearts;
     }
 
     var loseScreen = new global.LoseScreen({
@@ -208,6 +221,9 @@
       },
       onPurchase: function() {
         global.location.href = 'uniwebview://subscription_request';
+      },
+      onClose: function(state) {
+        navigateClose(state);
       }
     });
     var quitScreen = typeof global.QuitScreen === 'function'
@@ -217,7 +233,7 @@
         coins: loseScreen.getState().coinsCount,
         hearts: loseScreen.getState().heartsCount,
         onQuit: function(state) {
-          global.location.href = 'uniwebview://close?coins=' + state.coinsCount + '&hearts=' + state.heartsCount;
+          navigateClose(state);
         }
       })
       : null;
@@ -240,6 +256,9 @@
       : null;
     var unityBridge = createUnityBridge(loseScreen, mainHud, quitScreen);
     var debugPanel = new global.DebugPanel({
+      onWin: function() {
+        unityBridge.complete();
+      },
       onLose: function() {
         unityBridge.showLoseScreen();
       },
@@ -266,6 +285,7 @@
     global.hideMainHud = unityBridge.hideMainHud;
     global.showQuitScreen = unityBridge.showQuitScreen;
     global.hideQuitScreen = unityBridge.hideQuitScreen;
+    global.complete = unityBridge.complete;
 
     global.unityState = unityBridge.state;
     global.unityBridge = unityBridge;
