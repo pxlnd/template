@@ -54,6 +54,25 @@
       });
     }
 
+    loseScreen.setHandlers({
+      onShow: function(nextState) {
+        state.coinsCount = nextState.coinsCount;
+        state.heartsCount = nextState.heartsCount;
+      },
+      onStateChange: function(nextState) {
+        state.coinsCount = nextState.coinsCount;
+        state.heartsCount = nextState.heartsCount;
+        state.timeOutCoinsCost = nextState.timeOutCoinsCost;
+        state.isSubscribed = nextState.isSubscribed;
+        state.maxLives = nextState.heartsMaxCount;
+
+        if (quitScreen) {
+          quitScreen.setCoins(state.coinsCount);
+          quitScreen.setHearts(state.heartsCount);
+        }
+      }
+    });
+
     function setCoins(value) {
       state.coinsCount = Math.max(0, toNumber(value, 0));
       loseScreen.setCoins(state.coinsCount);
@@ -90,6 +109,16 @@
       var isSuccess = toBoolean(value);
       loseScreen.rewardResult(isSuccess);
       return isSuccess;
+    }
+
+    function showLoseScreen() {
+      loseScreen.setCoins(state.coinsCount);
+      loseScreen.setHearts(state.heartsCount);
+      loseScreen.show();
+    }
+
+    function hideLoseScreen() {
+      loseScreen.hide();
     }
 
     function setLevel(value) {
@@ -151,6 +180,8 @@
       setSubscriptionStatus: setSubscriptionStatus,
       setMaxLives: setMaxLives,
       rewardResult: rewardResult,
+      showLoseScreen: showLoseScreen,
+      hideLoseScreen: hideLoseScreen,
       setLevel: setLevel,
       showMainHud: showMainHud,
       hideMainHud: hideMainHud,
@@ -210,10 +241,10 @@
     var unityBridge = createUnityBridge(loseScreen, mainHud, quitScreen);
     var debugPanel = new global.DebugPanel({
       onLose: function() {
-        loseScreen.show();
+        unityBridge.showLoseScreen();
       },
       onRestart: function() {
-        loseScreen.hide();
+        unityBridge.hideLoseScreen();
         if (quitScreen) quitScreen.hide();
       }
     });
@@ -228,6 +259,8 @@
     global.setSubscriptionStatus = unityBridge.setSubscriptionStatus;
     global.setMaxLives = unityBridge.setMaxLives;
     global.rewardResult = unityBridge.rewardResult;
+    global.showLoseScreen = unityBridge.showLoseScreen;
+    global.hideLoseScreen = unityBridge.hideLoseScreen;
     global.setLevel = unityBridge.setLevel;
     global.showMainHud = unityBridge.showMainHud;
     global.hideMainHud = unityBridge.hideMainHud;
