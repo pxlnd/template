@@ -231,6 +231,38 @@
       }, 50);
     }
 
+    function isInteractiveElement(element) {
+      while (element && element !== document) {
+        if (element.nodeType !== 1) {
+          element = element.parentNode;
+          continue;
+        }
+
+        var tagName = element.tagName.toLowerCase();
+        if (
+          tagName === 'button' ||
+          tagName === 'a' ||
+          tagName === 'input' ||
+          tagName === 'select' ||
+          tagName === 'textarea' ||
+          tagName === 'label'
+        ) {
+          return true;
+        }
+
+        element = element.parentNode;
+      }
+
+      return false;
+    }
+
+    function bindScreenTapTracking() {
+      document.addEventListener('click', function(event) {
+        if (isInteractiveElement(event.target)) return;
+        trackUnityEvent('tap', 'screen');
+      });
+    }
+
     var loseScreen = new global.LoseScreen({
       stylesheetPath: './css/lose-screen.css',
       assetBasePath: './content/icons/lose',
@@ -296,6 +328,7 @@
       debugPanel: debugPanel
     });
 
+    bindScreenTapTracking();
     hotkeyController.start();
     global.setCoins = unityBridge.setCoins;
     global.setHearts = unityBridge.setHearts;
